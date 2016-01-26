@@ -7,7 +7,7 @@ class CreateUsersTable < ActiveRecord::Migration
       t.string :last_name
       t.string :location
       t.string :phone_number
-      t.timestamps null: false
+      t.timestamps null: false, :default => Time.now
     end
   end
 end
@@ -18,7 +18,7 @@ class CreateArticlesTable < ActiveRecord::Migration
       t.belongs_to :user
       t.string :title
       t.text :body
-      t.timestamps null: false
+      t.timestamps null: false, :default => Time.now
     end
   end
 end
@@ -29,7 +29,7 @@ class CreatePostsTable < ActiveRecord::Migration
       t.belongs_to :users
       t.belongs_to :articles
       t.text :body
-      t.timestamps null: false
+      t.timestamps null: false, :default => Time.now
     end
   end
 end

@@ -1,11 +1,11 @@
 -- from http://stackoverflow.com/questions/3970795/how-do-you-create-a-random-string-in-postgresql
 -- \c benchmark_talk
-create or replace function random_string(length integer) returns text as 
+CREATE OR REPLACE function random_string(length INTEGER) RETURNS TEXT AS
   $$
-  declare
-    chars text[] := '{0,1,2,3,4,5,6,7,8,9,A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z,a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z}';
-    result text := '';
-    i integer := 0;
+  DECLARE
+    chars TEXT[] := '{0,1,2,3,4,5,6,7,8,9,A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z,a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z}';
+    result TEXT:= '';
+    i INTEGER := 0;
   begin
     if length < 0 then
     raise exception 'Given length cannot be less than 0';
@@ -15,26 +15,26 @@ create or replace function random_string(length integer) returns text as
   end loop;
     return result;
   end;
-  $$ language plpgsql;
+  $$ LANGUAGE PLPGSQL;
 
 CREATE OR REPLACE FUNCTION random_email() RETURNS VARCHAR AS
   $$
     BEGIN
-      RETURN (random_string(3) || '@' || random_string(4) || '.com')
+      RETURN (random_string(3) || '@' || random_string(4) || '.com');
     END
   $$ LANGUAGE PLPGSQL;
 
 CREATE OR REPLACE FUNCTION random_location() RETURNS VARCHAR AS
   $$
     BEGIN
-      return (string_to_array('california,nevada,new york,oregon,washington', ','))[random_num(4)];
+      RETURN (string_to_array('california,nevada,new york,oregon,washington', ','))[random_num(0, 4)];
     END
   $$ LANGUAGE PLPGSQL;
 
-CREATE OR REPLACE FUNCTION random_num(max INTEGER) RETURNS INTEGER AS
+CREATE OR REPLACE FUNCTION random_num(min INTEGER, max INTEGER) RETURNS INTEGER AS
   $$
   BEGIN
-    return trunc(random() * max);
+    return trunc(random() * max + min);
   END;
   $$ LANGUAGE PLPGSQL;
 
@@ -49,11 +49,45 @@ DELETE FROM posts;
 DO
 $do$
 BEGIN
-  FOR i in 1..100 LOOP
+  RAISE NOTICE 'starting users seed...';
+  FOR i in 1..2000000 LOOP
     INSERT INTO users 
-      (email, first_name, last_name, location, phone_number) 
+      (email, first_name, last_name, location, phone_number, created_at, updated_at) 
       VALUES 
-      ();
+      (random_email(), random_string(7), random_string(7), random_location(), random_string(9), now(), now());
+      IF i % 100000 = 0 THEN
+        RAISE NOTICE 'user # %', i;
+      END IF;
   END LOOP;
+  RAISE NOTICE 'done.';
+
+  RAISE NOTICE 'starting articles seed...';
+  FOR i in 1..4000000 LOOP
+    INSERT INTO articles
+      (user_id, title, body, created_at, updated_at)
+      VALUES
+      -- 25% of users have made 4 million articles - avg 8 articles each
+      (random_num(1, 500000), random_string(7), random_string(20), now(), now());
+
+      IF i % 100000 = 0 THEN
+        RAISE NOTICE 'article # %', i;
+      END IF;
+  END LOOP;
+  RAISE NOTICE 'done.';
+
+  RAISE NOTICE 'starting posts seed...';
+  FOR i in 1..8000000 LOOP
+    INSERT INTO posts
+      (users_id, articles_id, body, created_at, updated_at)
+      VALUES
+      -- 25% of users have made 8 million posts - avg 16 posts each
+      -- across 25% of articles - avg 8 posts per article
+      (random_num(1, 500000), random_num(1, 1000000), random_string(20), now(), now());
+
+      IF i % 100000 = 0 THEN
+        RAISE NOTICE 'post # %', i;
+      END IF;
+  END LOOP;
+  RAISE NOTICE 'done.';
 END
-$do$;
+$do$ LANGUAGE PLPGSQL;
