@@ -78,7 +78,7 @@ BEGIN
   RAISE NOTICE 'starting posts seed...';
   FOR i in 1..8000000 LOOP
     INSERT INTO posts
-      (users_id, articles_id, body, created_at, updated_at)
+      (user_id, article_id, body, created_at, updated_at)
       VALUES
       -- 25% of users have made 8 million posts - avg 16 posts each
       -- across 25% of articles - avg 8 posts per article

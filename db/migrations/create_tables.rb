@@ -26,8 +26,8 @@ end
 class CreatePostsTable < ActiveRecord::Migration
   def change
     create_table :posts do |t|
-      t.belongs_to :users
-      t.belongs_to :articles
+      t.belongs_to :user
+      t.belongs_to :article
       t.text :body
       t.timestamps null: false, :default => Time.now
     end
