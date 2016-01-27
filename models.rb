@@ -1,7 +1,7 @@
 require 'active_record'
 
 class ActiveRecord::Base 
-  self.establish_connection :adapter => 'postgresql', :host => 'localhost', :port => 5432, :username => 'john', :password => ENV['POSTGRES_PASSWORD'], :database => 'benchmark_talk'
+  self.establish_connection :adapter => 'postgresql', :host => 'localhost', :port => ENV['POSTGRES_PORT'] || 5432, :username => 'john', :password => ENV['POSTGRES_PASSWORD'], :database => 'benchmark_talk'
   #self.logger = Logger.new STDOUT
 end
 
