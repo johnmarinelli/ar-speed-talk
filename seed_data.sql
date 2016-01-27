@@ -17,6 +17,17 @@ CREATE OR REPLACE function random_string(length INTEGER) RETURNS TEXT AS
   end;
   $$ LANGUAGE PLPGSQL;
 
+CREATE OR REPLACE FUNCTION random_date(start_date VARCHAR, end_date VARCHAR) RETURNS TIMESTAMP AS
+  $$
+    DECLARE
+      ts_start TIMESTAMP:= start_date;
+      ts_end TIMESTAMP:= end_date;
+    BEGIN
+      RETURN ts_start + random() * (ts_end - ts_start);
+    END
+  $$ LANGUAGE PLPGSQL;
+
+
 CREATE OR REPLACE FUNCTION random_email() RETURNS VARCHAR AS
   $$
     BEGIN
@@ -54,10 +65,10 @@ BEGIN
     INSERT INTO users 
       (email, first_name, last_name, location, phone_number, created_at, updated_at) 
       VALUES 
-      (random_email(), random_string(7), random_string(7), random_location(), random_string(9), now(), now());
-      IF i % 100000 = 0 THEN
-        RAISE NOTICE 'user # %', i;
-      END IF;
+      (random_email(), random_string(7), random_string(7), random_location(), random_string(9), random_date('2015-01-01', '2016-01-01'), random_date('2016-01-02', '2016-01-27'))
+    IF i % 100000 = 0 THEN
+      RAISE NOTICE 'user # %', i;
+    END IF;
   END LOOP;
   RAISE NOTICE 'done.';
 
@@ -67,11 +78,11 @@ BEGIN
       (user_id, title, body, created_at, updated_at)
       VALUES
       -- 25% of users have made 4 million articles - avg 8 articles each
-      (random_num(1, 500000), random_string(7), random_string(20), now(), now());
+      (random_num(1, 500000), random_string(7), random_string(20), random_date('2015-01-01', '2016-01-01'), random_date('2016-01-02', '2016-01-27'))
 
-      IF i % 100000 = 0 THEN
-        RAISE NOTICE 'article # %', i;
-      END IF;
+    IF i % 100000 = 0 THEN
+      RAISE NOTICE 'article # %', i;
+    END IF;
   END LOOP;
   RAISE NOTICE 'done.';
 
@@ -82,11 +93,11 @@ BEGIN
       VALUES
       -- 25% of users have made 8 million posts - avg 16 posts each
       -- across 25% of articles - avg 8 posts per article
-      (random_num(1, 500000), random_num(1, 1000000), random_string(20), now(), now());
+      (random_num(1, 500000), random_num(1, 1000000), random_string(20), random_date('2015-01-01', '2016-01-01'), random_date('2016-01-02', '2016-01-27'))
 
-      IF i % 100000 = 0 THEN
-        RAISE NOTICE 'post # %', i;
-      END IF;
+    IF i % 100000 = 0 THEN
+      RAISE NOTICE 'post # %', i;
+    END IF;
   END LOOP;
   RAISE NOTICE 'done.';
 END
