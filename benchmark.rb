@@ -36,14 +36,14 @@ end
 
 
 print_header 'RUBY VS SQL: PART 1'
-#
+
 # Sort a users' articles by title
 # (Do database work in the database)
 # 
 # Rubyesque way
 Benchmark.bm(10) do |x|
   x.report("Using idiomatic Ruby") {
-    User.first.articles.sort { |a, b| a.title <=> b.title }
+    User.first.articles.sort { |a, b| b.title <=> a.title }
   }
 end
 
@@ -51,7 +51,7 @@ end
 # performs about 300% quicker
 Benchmark.bm(10) do |x|
   x.report("Using ORM generated SQL") {
-    User.first.articles.order(:title => :asc)
+    User.first.articles.order(:title => :desc)
       .each { |a| a.title }
   }
 end
@@ -79,7 +79,7 @@ Benchmark.bm(10) do |x|
   }
 end
 
-print_header 'RUBY VS SQL: PART 3'
+#print_header 'RUBY VS SQL: PART 3'
 #
 # Average users created, per month-week
 # 
@@ -97,13 +97,8 @@ Benchmark.bm(10) do |x|
 
     User.where(:created_at => (Date.parse('2015-07-01')..Date.parse('2015-09-01')))
         .each do |u|
-          wom = week_of_month(u.created_at)
-          begin
-            wks_bucket[wom - 1] += 1
-          rescue NoMethodError => e
-            p wks_bucket
-            p wom
-          end
+          wom = week_of_month u.created_at
+          wks_bucket[wom - 1] += 1
         end
 
     wks_bucket.map! { |w| w / 2 }
